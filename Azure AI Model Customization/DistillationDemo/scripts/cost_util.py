@@ -1,21 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Constants (after applying 80:20 split)
+o3_token_cost_per_1M = 4.8  # USD (revised to June '25 pricing)
+gpt41_token_cost_per_1M = 4.4  # USD
+ft_gpt41_token_cost_per_1M = 4.4  # USD
+ft_gpt41_hosting_cost_per_hour = 1.7  # USD
+
+# Per token cost
+o3_cost_per_token = o3_token_cost_per_1M / 1_000_000
+gpt41_cost_per_token = gpt41_token_cost_per_1M / 1_000_000
+ft_gpt41_cost_per_token = ft_gpt41_token_cost_per_1M / 1_000_000
+
 def plot_cost_comparison():
     """
     Plots the cost comparison between o3, gpt-4.1, and fine-tuned gpt-4.1 models.
     """
-    # Constants (after applying 80:20 split)
-    o3_token_cost_per_1M = 24.0  # USD
-    gpt41_token_cost_per_1M = 4.4  # USD
-    ft_gpt41_token_cost_per_1M = 4.4  # USD
-    ft_gpt41_hosting_cost_per_hour = 1.7  # USD
-
-    # Per token cost
-    o3_cost_per_token = o3_token_cost_per_1M / 1_000_000
-    gpt41_cost_per_token = gpt41_token_cost_per_1M / 1_000_000
-    ft_gpt41_cost_per_token = ft_gpt41_token_cost_per_1M / 1_000_000
-
     # Range of TPM values
     tpm_values = np.linspace(100, 1_000_000, 200)  # 100 to 1 Million TPM
 
@@ -41,16 +41,6 @@ def plot_cost_break_even():
     """
     Plots the cost comparison with a zoomed-in view and highlights the break-even point.
     """
-    # Constants
-    o3_token_cost_per_1M = 24.0  # USD
-    gpt41_token_cost_per_1M = 4.4  # USD
-    ft_gpt41_token_cost_per_1M = 4.4  # USD
-    ft_gpt41_hosting_cost_per_hour = 1.7  # USD
-
-    o3_cost_per_token = o3_token_cost_per_1M / 1_000_000
-    gpt41_cost_per_token = gpt41_token_cost_per_1M / 1_000_000
-    ft_gpt41_cost_per_token = ft_gpt41_token_cost_per_1M / 1_000_000
-
     # Range of TPM values
     tpm_values = np.linspace(100, 10000, 400)  # Zoom: 100 to 10,000 TPM
 

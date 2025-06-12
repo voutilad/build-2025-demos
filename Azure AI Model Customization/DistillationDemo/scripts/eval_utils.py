@@ -1,5 +1,4 @@
 import requests
-import time
 import asyncio
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -15,7 +14,7 @@ load_dotenv()
 OAI_API_TYPE = os.getenv("OAI_API_TYPE", "azure").lower()
 AZURE_API_KEY = os.getenv("AZURE_API_KEY")
 AZURE_API_ENDPOINT = os.getenv("AZURE_API_ENDPOINT") + "/openai"
-API_VERSION = os.getenv("API_VERSION")
+API_VERSION = os.getenv("API_VERSION", "2025-04-01-preview")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_API_BASE = os.getenv("OPENAI_API_BASE")
 
@@ -95,7 +94,7 @@ async def create_eval(pass_threshold: float, grader_model: str, name: str, with_
                         }
                     ],
                     "pass_threshold": pass_threshold,
-                    "range": [0.0, 7.0]
+                    "range": [1.0, 7.0]
                 }
             ]
         }

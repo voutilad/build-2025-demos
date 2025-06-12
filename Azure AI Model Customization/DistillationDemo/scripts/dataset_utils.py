@@ -66,9 +66,9 @@ def save_eval_dataset(dataset, output_path_base, include_item_field=False):
             rejected = row['human_ref_B'] if row['labels'] == 1 else row['human_ref_A']
 
             # Create the record structures
-            prompt_record = {"item": {"input": row['history']}}
-            preferred_record = {"item": {"input": row['history'], "output": preferred}}
-            rejected_record = {"item": {"input": row['history'], "output": rejected}}
+            prompt_record = {"input": row['history']}
+            preferred_record = {"input": row['history'], "output": preferred}
+            rejected_record = {"input": row['history'], "output": rejected}
 
             full_record = {
                 "prompt": row['history'],

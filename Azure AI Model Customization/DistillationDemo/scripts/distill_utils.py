@@ -1,8 +1,5 @@
-import requests
 import time
-import asyncio
 import pandas as pd
-import matplotlib.pyplot as plt
 import json
 import time
 from pathlib import Path
@@ -18,10 +15,7 @@ load_dotenv()
 # API keys and endpoint
 AZURE_API_KEY = os.getenv("AZURE_API_KEY")
 AZURE_API_ENDPOINT = os.getenv("AZURE_API_ENDPOINT")
-API_VERSION = os.getenv("API_VERSION")
-
-
-
+API_VERSION = os.getenv("API_VERSION", "2025-04-01-preview")
 
 def distill_from_teacher_model(teacher_model: str, input_path: str, output_path: str, max_records: int = 1000, retries: int = 3, retry_delay: int = 10):
     """

@@ -1,19 +1,17 @@
 # Import required libraries
 import requests
-import time
-import json
 import asyncio
 
 from dotenv import load_dotenv
 import os
 
 # Load environment variables from the .env file
-load_dotenv('C:\\Users\\omkarm\\code\\finetunesapi\\scripts\\DistillationDemo\\.env')
+load_dotenv()
 
 # API keys and endpoint
 AZURE_API_KEY = os.getenv("AZURE_API_KEY")
 AZURE_API_ENDPOINT = os.getenv("AZURE_API_ENDPOINT")
-API_VERSION = os.getenv("API_VERSION")
+API_VERSION = os.getenv("API_VERSION", "2025-04-01-preview")
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_API_ENDPOINT = os.getenv("OPENAI_API_BASE")
@@ -56,7 +54,6 @@ async def upload_file(file_name: str, file_path: str, purpose: str = "fine-tune"
             return ''
     else:
         # Azure file upload logic
-        print("Using Azure API for file upload...")
         with open(file_path, 'rb') as file:
             response = await asyncio.to_thread(
                 requests.post,
@@ -65,8 +62,10 @@ async def upload_file(file_name: str, file_path: str, purpose: str = "fine-tune"
                 headers={
                     'api-key': AZURE_API_KEY,
                 },
-                files={"file": (file_name, file, 'multipart/form-data')},
-                data={"purpose": purpose}
+                files={
+                    "file": (file_name, file, 'multipart/form-data'),
+                    "purpose": (None, "evals"),
+                }
             )
 
         if response.status_code in (201, 200):
