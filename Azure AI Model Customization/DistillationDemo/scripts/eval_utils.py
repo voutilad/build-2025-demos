@@ -138,6 +138,9 @@ def display_evaluation_summary(client: openai.Client, eval_ids: list):
         all_scores = []
         run_labels = []
         score_summary = []  # To store data for the summary table
+        print("=" * 50)
+        print("Fetching scores...")
+        print("=" * 50)
         for _, row in df.iterrows():
             run_id = row['id']
             model = row['model']
@@ -187,7 +190,7 @@ def display_evaluation_summary(client: openai.Client, eval_ids: list):
             max_cols = 4  # Maximum number of graphs per row
             num_rows = (num_runs + max_cols - 1) // max_cols  # Calculate the number of rows
 
-            fig, axes = plt.subplots(num_rows, max_cols, figsize=(5 * max_cols, 4 * num_rows), sharey=True)
+            _, axes = plt.subplots(num_rows, max_cols, figsize=(5 * max_cols, 4 * num_rows), sharey=True)
             axes = axes.flatten()  # Flatten the axes array for easier indexing
 
             for i, ((scores, color), label) in enumerate(zip(all_scores, run_labels)):
@@ -223,19 +226,17 @@ def get_eval_run_output_items(client: openai.Client, eval_id: str, run_id: str) 
     Returns:
         list: A list of scores for the output items.
     """
-    
+    scores = []
+
     try:
-        response = client.evals.runs.retrieve(eval_id=eval_id, run_id=run_id)
+        response = client.evals.runs.output_items.list(run_id=run_id, eval_id=eval_id)
+        for page in response.iter_pages():
+            for item in page.data:
+                for result in item.results:
+                    score = result.get("score")
+                    if score is not None:
+                        scores.append(score)
     except Exception as e:
         print(f"Failed to fetch output items for run {run_id}. Error: {e}")
-        return []
-    
-    output_items = response.to_dict().get('data', [])
-    scores = []
-    for item in output_items:
-        results = item.get('results', [])
-        for result in results:
-            score = result.get('score')
-            if score is not None:
-                scores.append(score)
+
     return scores
