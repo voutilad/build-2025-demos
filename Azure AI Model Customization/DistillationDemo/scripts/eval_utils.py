@@ -153,40 +153,40 @@ def display_evaluation_summary(client: openai.Client, eval_ids: list):
                 future = pool.submit(get_eval_run_output_items, client, eval_id, run_id)
                 futures.update({ future: (row['model'] , eval_id)})
 
-        for f in as_completed(futures.keys()):
-            try:
-                model, eval_id = futures[f]
-                scores = f.result()
-            except Exception as e:
-                print(f"exception fetching future result: {e}")
-                scores = None
-            if scores:
-                avg_score = sum(scores) / len(scores)
-                min_score = min(scores)
-                max_score = max(scores)
-                p10 = np.percentile(scores, 10)  # 10th percentile
-                p25 = np.percentile(scores, 25)  # 25th percentile
-                p50 = np.percentile(scores, 50)  # 50th percentile (median)
-                p75 = np.percentile(scores, 75)  # 75th percentile
-                p90 = np.percentile(scores, 90)  # 90th percentile
+            for f in as_completed(futures.keys()):
+                try:
+                    model, eval_id = futures[f]
+                    scores = f.result()
+                except Exception as e:
+                    print(f"exception fetching future result: {e}")
+                    scores = None
+                if scores:
+                    avg_score = sum(scores) / len(scores)
+                    min_score = min(scores)
+                    max_score = max(scores)
+                    p10 = np.percentile(scores, 10)  # 10th percentile
+                    p25 = np.percentile(scores, 25)  # 25th percentile
+                    p50 = np.percentile(scores, 50)  # 50th percentile (median)
+                    p75 = np.percentile(scores, 75)  # 75th percentile
+                    p90 = np.percentile(scores, 90)  # 90th percentile
 
-                # Collect scores and labels for the combined chart
-                all_scores.append((scores, eval_id_to_color[eval_id]))  # Include color for the subplot
-                run_labels.append(f"{model} ({eval_id_to_name[eval_id]})")  # Include eval name in the label
+                    # Collect scores and labels for the combined chart
+                    all_scores.append((scores, eval_id_to_color[eval_id]))  # Include color for the subplot
+                    run_labels.append(f"{model} ({eval_id_to_name[eval_id]})")  # Include eval name in the label
 
-                # Add data to the summary table
-                score_summary.append({
-                    "Model": model,
-                    "Evaluation Name": eval_id_to_name[eval_id],
-                    "Average Score": f"{avg_score:.2f}",
-                    "Min Score": f"{min_score:.2f}",
-                    "Max Score": f"{max_score:.2f}",
-                    "10th Percentile": f"{p10:.2f}",
-                    "25th Percentile": f"{p25:.2f}",
-                    "50th Percentile": f"{p50:.2f}",
-                    "75th Percentile": f"{p75:.2f}",
-                    "90th Percentile": f"{p90:.2f}"
-                })
+                    # Add data to the summary table
+                    score_summary.append({
+                        "Model": model,
+                        "Evaluation Name": eval_id_to_name[eval_id],
+                        "Average Score": f"{avg_score:.2f}",
+                        "Min Score": f"{min_score:.2f}",
+                        "Max Score": f"{max_score:.2f}",
+                        "10th Percentile": f"{p10:.2f}",
+                        "25th Percentile": f"{p25:.2f}",
+                        "50th Percentile": f"{p50:.2f}",
+                        "75th Percentile": f"{p75:.2f}",
+                        "90th Percentile": f"{p90:.2f}"
+                    })
 
         # Display the score summary as a table
         if score_summary:
