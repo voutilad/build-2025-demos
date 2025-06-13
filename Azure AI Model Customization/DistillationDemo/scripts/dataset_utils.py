@@ -60,7 +60,7 @@ def save_eval_dataset(dataset, output_path_base, include_item_field=False):
          open(rejected_path, 'w', encoding='utf-8') as rejected_file, \
          open(full_path, 'w', encoding='utf-8') as full_file:
 
-        for idx, row in enumerate(dataset):
+        for _, row in enumerate(dataset):
             # Determine preferred and rejected responses based on labels
             preferred = row['human_ref_A'] if row['labels'] == 1 else row['human_ref_B']
             rejected = row['human_ref_B'] if row['labels'] == 1 else row['human_ref_A']
