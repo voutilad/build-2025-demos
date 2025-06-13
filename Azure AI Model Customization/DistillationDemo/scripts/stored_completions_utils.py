@@ -55,7 +55,7 @@ def process_and_store_completions(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.touch()
 
-    futures = {} # future: prompt
+    futures = {} # dict of: {future: (index, prompt)}
     with ThreadPoolExecutor(thread_name_prefix="chat-completion") as pool:
         for i, entry in enumerate(data):
             prompt = entry.get("prompt")
@@ -77,12 +77,16 @@ def process_and_store_completions(
                 },
             }
             future = pool.submit(client.chat.completions.create, **kwargs)
-            futures.update({ future: prompt })
+            futures.update({ future: (i, prompt) })
 
         with open(output_path, "a", encoding="utf-8") as f:
             for future in tqdm(as_completed(futures.keys()), total=len(futures)):
-                completion = future.result()
-                prompt = futures[future]
+                i, prompt = futures[future]
+                try:
+                    completion = future.result()
+                except Exception as e:
+                    print(f"⚠️ error for prompt {i}: {e}")
+                    continue
                 output_record = {
                     "prompt": prompt,
                     "stored_completion_id": completion.id,
