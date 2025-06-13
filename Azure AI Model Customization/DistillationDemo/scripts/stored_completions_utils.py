@@ -5,7 +5,11 @@ import time
 
 import openai
 from pathlib import Path
+
+#from tqdm.notebook import tqdm
 from tqdm import tqdm
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 def process_and_store_completions(
@@ -51,47 +55,42 @@ def process_and_store_completions(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.touch()
 
-    # Process each record
-    for index, data_entry in enumerate(tqdm(data, desc="Processing completions")):
-        prompt = data_entry.get("prompt")
-        if not prompt:
-            print(f"⚠️ Skipping record {index}: Missing 'prompt' field.")
-            continue
-
-        # Send the request with retries
-        try:
-            completion = client.chat.completions.create(
-                model=model,
-                messages=[
+    futures = {} # future: prompt
+    with ThreadPoolExecutor(thread_name_prefix="chat-completion") as pool:
+        for i, entry in enumerate(data):
+            prompt = entry.get("prompt")
+            if not prompt:
+                print(f"⚠️ Skipping record {i}: Missing 'prompt' field.")
+                continue
+            kwargs = {
+                "model": model,
+                "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt},
                 ],
-                store=True,
-                metadata={
+                "store": True,
+                "metadata": {
                     "dataset": dataset_name,
                     "model": model,
-                    "index": str(index),
+                    "index": str(i),
                     "author": author,
                 },
-                # TODO: allow setting max_tokens or max_completions_tokens
-            )
-
-            # Format the output record
-            output_record = {
-                "prompt": prompt,
-                "stored_completion_id": completion.id,
-                "preferred_output": completion.choices[0].message.content.strip(),
             }
+            future = pool.submit(client.chat.completions.create, **kwargs)
+            futures.update({ future: prompt })
 
-            # Append the formatted record to the output file
-            with open(output_path, "a", encoding="utf-8") as f:
+        with open(output_path, "a", encoding="utf-8") as f:
+            for future in tqdm(as_completed(futures.keys()), total=len(futures)):
+                completion = future.result()
+                prompt = futures[future]
+                output_record = {
+                    "prompt": prompt,
+                    "stored_completion_id": completion.id,
+                    "preferred_output": completion.choices[0].message.content.strip(),
+                }
+                # Append the formatted record to the output file
                 json.dump(output_record, f)
                 f.write("\n")
-
-            # print(f"✅ Stored completion for record {index}: {completion.id}")
-
-        except Exception as e:
-            print(f"⚠️ Error processing record {index}: {e}")
 
     print(f"\n✅ Done. Completions saved to: {output_path}")
 
