@@ -153,8 +153,6 @@ def display_evaluation_summary(client: openai.Client, eval_ids: list):
                 future = pool.submit(get_eval_run_output_items, client, eval_id, run_id)
                 futures.update({ future: (row['model'] , eval_id)})
 
-        print(f"XXX created futures: {futures}")
-
         for f in as_completed(futures.keys()):
             try:
                 model, eval_id = futures[f]

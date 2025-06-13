@@ -31,7 +31,7 @@ def plot_cost_comparison():
     plt.plot(tpm_values, ft_gpt41_costs, label="ft-gpt-4.1 (Fine-Tuned Model)", color="orange")
     plt.xlabel("Tokens per Minute (TPM)")
     plt.ylabel("Total Cost per Hour (USD)")
-    plt.title("Cost Comparison: o3 vs gpt-4.1 vs ft-gpt-4.1 (April 2025 Pricing, 80:20 Input:Output)")
+    plt.title("Cost Comparison: o3 vs gpt-4.1 vs ft-gpt-4.1 (June 2025 Pricing, 80:20 Input:Output)")
     plt.legend()
     plt.xscale("log")
     plt.grid(True)
@@ -42,7 +42,7 @@ def plot_cost_break_even():
     Plots the cost comparison with a zoomed-in view and highlights the break-even point.
     """
     # Range of TPM values
-    tpm_values = np.linspace(100, 10000, 400)  # Zoom: 100 to 10,000 TPM
+    tpm_values = np.linspace(50_000, 100_000, 400)
 
     # Cost calculations
     o3_costs = o3_cost_per_token * tpm_values * 60
@@ -61,7 +61,7 @@ def plot_cost_break_even():
     # Add break-even line
     plt.axvline(x=break_even_tpm, color="red", linestyle="--", label=f"Break-even (~{int(break_even_tpm)} TPM)")
 
-    plt.xlim(100, 10000)  # Zoom: 100 to 10,000 TPM
+    plt.xlim(50_000, 100_000)
     plt.xlabel("Tokens per Minute (TPM)")
     plt.ylabel("Total Cost per Hour (USD)")
     plt.title("Cost Comparison and Break-Even: o3 vs gpt-4.1 vs ft-gpt-4.1 (Zoomed)")

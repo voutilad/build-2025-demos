@@ -5,6 +5,8 @@ import time
 from pathlib import Path
 from tqdm import tqdm
 from openai import AzureOpenAI
+import pandas as pd
+from IPython.display import display
 
 from dotenv import load_dotenv
 import os
@@ -16,6 +18,7 @@ load_dotenv()
 AZURE_API_KEY = os.getenv("AZURE_API_KEY")
 AZURE_API_ENDPOINT = os.getenv("AZURE_API_ENDPOINT")
 API_VERSION = os.getenv("API_VERSION", "2025-04-01-preview")
+
 
 def distill_from_teacher_model(teacher_model: str, input_path: str, output_path: str, max_records: int = 1000, retries: int = 3, retry_delay: int = 10):
     """
@@ -132,12 +135,6 @@ def convert_to_sft_format(input_path: str, output_path: str, system_prompt: str)
 
     print(f"✅ SFT-ready file saved to: {output_path} — {len(sft_data)} records")
 
-
-from pathlib import Path
-import json
-import time
-from tqdm import tqdm
-from openai import AzureOpenAI  # Make sure you're using the latest OpenAI SDK
 
 def distill_multiple_completions_with_logprob_summary(
     teacher_model: str,
@@ -296,9 +293,6 @@ def prepare_autograder_input_from_distilled_file(
 
     print(f"\n✅ Autograder input saved to: {autograder_output_path}")
 
-import json
-import pandas as pd
-from IPython.display import display
 
 def preview_fine_tuning_dataset(file_path, num_samples=3, max_len=500):
     """
