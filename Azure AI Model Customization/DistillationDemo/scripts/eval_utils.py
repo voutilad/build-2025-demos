@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np  # Import numpy for percentile calculations
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def get_eval_runs_list(client: openai.Client, eval_id: str) -> list:
     """
@@ -33,7 +34,7 @@ def get_eval_runs_list(client: openai.Client, eval_id: str) -> list:
                 errored = result.get('errored', 0)
                 failed = result.get('failed', 0)
                 total = result.get('total', 0)
-                pass_percentage = (passed * 100) / (passed + failed) if total > 0 else 0
+                pass_percentage = (passed * 100) / (passed + failed) if (passed + failed) > 0 else 0
                 error_percentage = (errored * 100) / total if total > 0 else 0
                 r['pass_percentage'] = pass_percentage
                 r['error_percentage'] = error_percentage
@@ -135,18 +136,29 @@ def display_evaluation_summary(client: openai.Client, eval_ids: list):
         plt.show()
 
         # Process each run to calculate and collect scores for distribution
+        # (This part can be slow as we have to page over results for each run, so we parallelize this.)
         all_scores = []
         run_labels = []
         score_summary = []  # To store data for the summary table
+
         print("=" * 50)
         print("Fetching scores...")
         print("=" * 50)
-        for _, row in df.iterrows():
-            run_id = row['id']
-            model = row['model']
-            eval_id = row['eval_id']
-            scores = get_eval_run_output_items(client, eval_id, run_id)
 
+        futures = []
+        with ThreadPoolExecutor(thread_name_prefix="eval-run-fetcher") as pool:
+            for _, row in df.iterrows():
+                run_id = row['id']
+                model = row['model']
+                eval_id = row['eval_id']
+
+                futures.append(pool.submit(get_eval_run_output_items, client, eval_id, run_id))
+        for r in as_completed(futures):
+            try:
+                scores = r.result()
+            except Exception as e:
+                print(f"exception fetching future result: {e}")
+                scores = None
             if scores:
                 avg_score = sum(scores) / len(scores)
                 min_score = min(scores)
