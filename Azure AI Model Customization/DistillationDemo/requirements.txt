@@ -1,7 +1,5 @@
 # Core libraries
-requests  # For making HTTP requests
 python-dotenv  # For loading environment variables from .env files
-asyncio  # For asynchronous programming
 
 # Data manipulation and visualization
 pandas  # For data manipulation and analysis
@@ -16,3 +14,6 @@ notebook  # For running Jupyter notebooks
 # OpenAI SDK
 openai  # For interacting with the OpenAI API
 
+# Azure Cognitive Services for control-plane access.
+azure-identity
+azure-mgmt-cognitiveservices

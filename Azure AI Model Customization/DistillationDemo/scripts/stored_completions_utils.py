@@ -22,6 +22,7 @@ def process_and_store_completions(
     max_records: int = None,
     system_prompt: str = "You are a helpful assistant.",
     wait_till_stored: bool = False,
+    max_completion_tokens: int = 1000,
 ):
     """
     Process an input JSONL file containing {"prompt": "xxx"}, call the Azure OpenAI API for stored completions,
@@ -75,6 +76,7 @@ def process_and_store_completions(
                     "index": str(i),
                     "author": author,
                 },
+                "max_completion_tokens": max_completion_tokens,
             }
             future = pool.submit(client.chat.completions.create, **kwargs)
             futures.update({ future: (i, prompt) })
@@ -84,17 +86,16 @@ def process_and_store_completions(
                 i, prompt = futures[future]
                 try:
                     completion = future.result()
+                    output_record = {
+                        "prompt": prompt,
+                        "stored_completion_id": completion.id,
+                        "preferred_output": completion.choices[0].message.content.strip(),
+                    }
+                    # Append the formatted record to the output file
+                    json.dump(output_record, f)
+                    f.write("\n")
                 except Exception as e:
                     print(f"⚠️ error for prompt {i}: {e}")
-                    continue
-                output_record = {
-                    "prompt": prompt,
-                    "stored_completion_id": completion.id,
-                    "preferred_output": completion.choices[0].message.content.strip(),
-                }
-                # Append the formatted record to the output file
-                json.dump(output_record, f)
-                f.write("\n")
 
     print(f"\n✅ Done. Completions saved to: {output_path}")
 
@@ -135,7 +136,7 @@ def wait_till_completion_stored(
             f"Waiting for stored completions to be available... "
             f"Current count: {completions_result.total}, Expected count: {expected_count}"
         )
-        time.sleep(5)
+        time.sleep(15)
 
     print(f"✅ All {expected_count} stored completions are available.")
 
